@@ -1,0 +1,56 @@
+name: C++ Build and Compile Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Install dependencies, including GoogleTest or else compilation will fail
+    - name: Install dependencies and GoogleTest
+      run: |
+        echo "Installing dependencies..."
+        sudo apt-get update
+        sudo apt-get install -y cmake g++ build-essential
+        # Install GoogleTest from source
+        cd /tmp
+        git clone https://github.com/google/googletest.git
+        cd googletest
+        cmake .
+        sudo make install
+
+    # Compile only if .cpp files are found
+    - name: Compile C++ code with GoogleTest
+      run: |
+        echo "Creating build directory..."
+        mkdir -p build
+        cd build
+        echo "Looking for .cpp files..."
+        ls -l ../  # List files in the parent directory for debugging
+        if ls ../*.cpp 1> /dev/null 2>&1; then
+          echo "Compiling C++ code..."
+          # Redirect both stdout and stderr to the log file
+          g++ -v -Wall -Wextra -o program ../*.cpp -lgtest -lgtest_main -pthread > compile_output.log 2>&1
+          echo "Compilation completed. Here is the output:"
+          cat compile_output.log  # Display the log content for debugging
+        else
+          echo "No .cpp files found. Skipping compilation." > compile_output.log
+        fi
+
+    # Upload compilation logs as artifacts, whether successful or not
+    - name: Upload compilation log
+      if: always()  # This ensures the artifact is uploaded even if the previous step fails
+      uses: actions/upload-artifact@v4
+      with:
+        name: compilation-log
+        path: build/compile_output.log
