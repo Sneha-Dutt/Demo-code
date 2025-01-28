@@ -1,13 +1,3 @@
-Suggestion inserted None selected 
-
-Skip to content
-Using Gmail with screen readers
-is:starred 
-Conversations
-21.25 GB of 200 GB used
-Terms · Privacy · Program Policies
-Last account activity: 2 hours ago
-Details
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
